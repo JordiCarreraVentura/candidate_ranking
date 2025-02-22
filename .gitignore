@@ -1,0 +1,11 @@
+
+# MacOS system files
+.DS_Store
+*/.DS_Store
+*/*/.DS_Store
+
+# Dataset files
+data/*/*
+
+# Jupyter notebook checkpoints
+notebooks/.ipynb_checkpoints/*
