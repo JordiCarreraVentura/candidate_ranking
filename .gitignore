@@ -5,6 +5,7 @@
 
 # Dataset files
 data/*/*
+data/*codiesp*
 
 # Jupyter notebook checkpoints
 notebooks/.ipynb_checkpoints/*
