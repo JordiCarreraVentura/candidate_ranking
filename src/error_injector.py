@@ -121,10 +121,13 @@ def corrupt_text(
     
         if random.random() < word_error_probability:
             error_type = random.choice(ERROR_TYPES + ['merge'])
-            idx = random.choice(list(
+            original_words = list(
                 set(range(len(corrupted_tokens) - 1))
                 - character_errors
-            ))
+            )
+            if not original_words:
+                continue
+            idx = random.choice(original_words)
             if error_type == 'delete':
                 corrupted_tokens = corrupted_tokens[:idx] + corrupted_tokens[idx + 1:]
                 word_errors += 1
