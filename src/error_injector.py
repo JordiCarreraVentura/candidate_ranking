@@ -60,25 +60,28 @@ def introduce_typo(word: str) -> str:
 
 def corrupt_text(
     text: str,
-    word_error_probability: float = 0.5,
+    word_error_probability: float = 0.1,
     character_error_probability: float = 0.1
 ) -> str:
     """
-    Introduces errors in a text string based on probabilities at both the character and word level. 
+    Introduces errors in a text string or string list based on probabilities
+    at both the character and word level.
 
     Parameters
     ----------
-    text : str
+    text: str
         The input text string that will be corrupted.
-    word_error_probability : float, optional 
-        The likelihood of each word being corrupted, by default 0.2
-    character_error_probability : float, optional
-        The likelihood of each character being corrupted, by default 0.2
+    character_error_probability: float = 0.1
+        The likelihood of each character being corrupted. Defaults to 0.1
+    word_error_probability: float = 0.1
+        The likelihood of each word being corrupted. Defaults to 0.1
 
     Returns
     -------
-    str
-        The corrupted string with random errors inserted.
+    Tuple[str, int, int]
+        The corrupted string with random errors inserted along with
+        the number of character-level errors and word-level errors
+        introduced in it.
 
     Examples
     --------
