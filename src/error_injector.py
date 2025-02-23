@@ -7,6 +7,12 @@ import pandas as pd
 
 ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 
+ERROR_TYPES = ["swap", "delete", "insert", "substitute"]
+
+
+def random_word() -> str:
+    return "".join(random.sample(ALPHABET, random.randrange(4, 10)))
+
 
 def introduce_typo(word: str) -> str:
     """
@@ -33,7 +39,7 @@ def introduce_typo(word: str) -> str:
     >>> random.seed(10663)
     >>> assert introduce_typo("lung") == 'luxg'             # substitution
     """
-    typo_type = random.choice(["swap", "delete", "insert", "substitute"])
+    typo_type = random.choice(ERROR_TYPES)
 
     if typo_type == "swap" and len(word) > 1:
         idx = random.randint(0, len(word) - 2)
@@ -54,7 +60,7 @@ def introduce_typo(word: str) -> str:
 
 def corrupt_text(
     text: str,
-    word_error_probability: float = 0.01,
+    word_error_probability: float = 0.5,
     character_error_probability: float = 0.1
 ) -> str:
     """
@@ -77,24 +83,75 @@ def corrupt_text(
     Examples
     --------
     >>> random.seed(10663)
-    >>> assert corrupt_text("take two aspirin", 0.5, 0.5) == ('keta wot aspiriz', 1, 2)
+    >>> corrupt_text("take two aspirin", 0.5, 0.5)
+    ('tnake two aspirinq', 2, 0)
+
+    >>> random.seed(11136)
+    >>> corrupt_text("take two aspirin", character_error_probability=0.77, word_error_probability=0)
+    ('takeq tow aspirin', 2, 0)
+
+    >>> random.seed(11136)
+    >>> corrupt_text("take two aspirin", character_error_probability=0.0, word_error_probability=0.5)
+    ('taketwo aspirin', 0, 1)
+
+    >>> random.seed(4489484)
+    >>> corrupt_text("take two aspirin", character_error_probability=0.0, word_error_probability=0.5)
+    ('two aspirin', 0, 1)
+
+    >>> random.seed(448)
+    >>> corrupt_text("take two aspirin", character_error_probability=0.0, word_error_probability=0.5)
+    ('take aspirin two', 0, 1)
     """
-    
-    character_errors, word_errors = 0, 0
-    while not (character_errors or word_errors):
+
+    character_errors, word_errors = set([]), 0
+
+    while not (len(character_errors) or word_errors):
+
         words = text.split()
-        corrupted_words = []
-        for word in words:
+        corrupted_tokens = []
+        for idx, word in enumerate(words):
             corrupted_word = word
-            if random.random() < word_error_probability:
-                corrupted_word = ''.join(random.sample(corrupted_word, len(corrupted_word)))
-                word_errors += 1
-            if random.random() < character_error_probability:
+            if character_error_probability and random.random() < character_error_probability:
                 corrupted_word = introduce_typo(corrupted_word)
-                character_errors += 1
-            corrupted_words.append(corrupted_word)
+                character_errors.add(idx)
+            corrupted_tokens.append(corrupted_word)
     
-    return " ".join(corrupted_words), character_errors, word_errors
+        if random.random() < word_error_probability:
+            error_type = random.choice(ERROR_TYPES + ['merge'])
+            idx = random.choice(list(
+                set(range(len(corrupted_tokens) - 1))
+                - character_errors
+            ))
+            if error_type == 'delete':
+                corrupted_tokens = corrupted_tokens[:idx] + corrupted_tokens[idx + 1:]
+                word_errors += 1
+            elif error_type == 'substitute':
+                corrupted_tokens[idx] = random_word()
+                word_errors += 1
+            elif error_type == 'swap':
+                corrupted_tokens = (
+                    corrupted_tokens[:idx]
+                    + [corrupted_tokens[idx + 1]]
+                    + [corrupted_tokens[idx]]
+                    + corrupted_tokens[idx + 2:]
+                )
+                word_errors += 1
+            elif error_type == 'merge':
+                corrupted_tokens = (
+                    corrupted_tokens[:idx]
+                    + [f"{corrupted_tokens[idx]}{corrupted_tokens[idx + 1]}"]
+                    + corrupted_tokens[idx + 2:]
+                )
+                word_errors += 1
+            elif error_type == 'insert':
+                corrupted_tokens = (
+                    corrupted_tokens[:idx] 
+                    + [random_word()]
+                    + corrupted_tokens[idx + 1:]
+                )
+                word_errors += 1
+    
+    return " ".join(corrupted_tokens), len(character_errors), word_errors
 
 
 testmod()
