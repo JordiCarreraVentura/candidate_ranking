@@ -45,5 +45,5 @@ for idx, txt_file in enumerate(tqdm(os.listdir(PATH_CODIESP_TEST_FILES))):
 CODIESP_SCHEMA = ["text_path", "text_id", "sentence"]
 TEST = pd.DataFrame(sentence_rows_test, columns=CODIESP_SCHEMA)
 random.seed(400449)
-TEST = TEST.sample(10000)
+TEST = TEST.sample(1000)
 TEST["text_id"] = TEST["text_id"].astype('int')
